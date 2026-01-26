@@ -43,23 +43,23 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 pb-24 md:pb-12">
+    <div className="space-y-3 pb-24 md:pb-12">
       {/* Vibe Stories Reel */}
-      <section className="flex space-x-4 overflow-x-auto no-scrollbar pb-1">
-        <div className="flex-shrink-0 flex flex-col items-center space-y-2 group cursor-pointer">
-          <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-200 group-hover:border-black transition-colors">
-            <i className="fas fa-plus text-gray-400 group-hover:text-black text-xs"></i>
+      <section className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex-shrink-0 flex flex-col items-center space-y-1.5 group cursor-pointer">
+          <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center border border-dashed border-gray-200 group-hover:border-black transition-colors">
+            <i className="fas fa-plus text-gray-400 group-hover:text-black text-[10px]"></i>
           </div>
-          <span className="text-[9px] font-bold uppercase text-gray-400">You</span>
+          <span className="text-[8px] font-bold uppercase text-gray-400">You</span>
         </div>
         {VIBE_STORIES.map(story => (
-          <div key={story.id} className="flex-shrink-0 flex flex-col items-center space-y-2 cursor-pointer group">
-            <div className={`w-14 h-14 rounded-2xl p-0.5 transition-transform group-hover:scale-105 duration-300 ${story.active ? 'bg-gradient-to-tr from-black to-gray-400' : 'bg-gray-200'}`}>
-              <div className="w-full h-full rounded-[0.85rem] bg-white p-0.5 overflow-hidden">
-                <img src={story.avatar} alt={story.user} className="w-full h-full object-cover rounded-[0.8rem]" />
+          <div key={story.id} className="flex-shrink-0 flex flex-col items-center space-y-1.5 cursor-pointer group">
+            <div className={`w-12 h-12 rounded-xl p-0.5 transition-transform group-hover:scale-105 duration-300 ${story.active ? 'bg-gradient-to-tr from-black to-gray-400' : 'bg-gray-200'}`}>
+              <div className="w-full h-full rounded-[0.65rem] bg-white p-0.5 overflow-hidden">
+                <img src={story.avatar} alt={story.user} className="w-full h-full object-cover rounded-[0.6rem]" />
               </div>
             </div>
-            <span className={`text-[9px] font-bold uppercase ${story.active ? 'text-black' : 'text-gray-400'}`}>
+            <span className={`text-[8px] font-bold uppercase ${story.active ? 'text-black' : 'text-gray-400'}`}>
               {story.user}
             </span>
           </div>
@@ -68,23 +68,23 @@ const Home: React.FC = () => {
 
       <PostComposer onPostCreated={handlePostCreated} />
 
-      {/* Tabs - Border removed as requested */}
-      <nav className="flex items-center space-x-6 py-1">
+      {/* Tabs - No border bottom as requested */}
+      <nav className="flex items-center space-x-5 py-1 px-1">
         <button 
           onClick={() => setActiveTab('for-you')}
-          className={`text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'for-you' ? 'text-black' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'for-you' ? 'text-black' : 'text-gray-400 hover:text-gray-600'}`}
         >
           For You
         </button>
         <button 
           onClick={() => setActiveTab('following')}
-          className={`text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'following' ? 'text-black' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'following' ? 'text-black' : 'text-gray-400 hover:text-gray-600'}`}
         >
           Following
         </button>
       </nav>
       
-      <div className="space-y-4">
+      <div className="space-y-3">
         {posts.map(post => (
           <PostCard key={post.id} post={post} />
         ))}

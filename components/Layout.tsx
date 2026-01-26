@@ -13,12 +13,12 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ to, icon, label, active }) => (
   <Link 
     to={to} 
-    className={`flex items-center space-x-3 p-2.5 rounded-xl transition-all duration-200 ${
-      active ? 'bg-black text-white shadow-md font-bold' : 'text-gray-500 hover:bg-gray-100'
+    className={`flex items-center space-x-2.5 p-2 rounded-lg transition-all duration-200 ${
+      active ? 'bg-black text-white shadow-sm font-bold' : 'text-gray-500 hover:bg-gray-100'
     }`}
   >
-    <i className={`${icon} text-base w-5 text-center`}></i>
-    <span className="text-sm font-medium">{label}</span>
+    <i className={`${icon} text-sm w-4 text-center`}></i>
+    <span className="text-[11px] font-bold uppercase tracking-tight">{label}</span>
   </Link>
 );
 
@@ -36,7 +36,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       
       <div className="flex-1 flex max-w-6xl mx-auto w-full relative">
         {!hideSidebars && (
-          <aside className="hidden md:flex flex-col w-56 p-4 sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
+          <aside className="hidden md:flex flex-col w-48 p-4 sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
             <nav className="space-y-1">
               <NavItem to="/" icon="fas fa-home" label="Feed" active={location.pathname === '/'} />
               <NavItem to="/explore" icon="fas fa-compass" label="Explore" active={location.pathname === '/explore'} />
@@ -52,21 +52,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </main>
 
         {!hideSidebars && (
-          <aside className="hidden lg:flex flex-col w-64 p-4 sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
-            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm mb-4">
-              <h2 className="text-xs font-bold text-gray-900 mb-3 flex items-center uppercase tracking-wider">
-                <i className="fas fa-fire text-black mr-2"></i>
+          <aside className="hidden lg:flex flex-col w-56 p-4 sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
+            <div className="bg-white rounded-xl p-3 border border-gray-50 shadow-sm mb-4">
+              <h2 className="text-[9px] font-black text-gray-400 mb-3 flex items-center uppercase tracking-widest">
                 Trending
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {[
                   { tag: 'Monochrome', count: '14.2k' },
                   { tag: 'ReactConf', count: '9.1k' },
                   { tag: 'AI_Vibes', count: '5.8k' }
                 ].map(item => (
                   <div key={item.tag} className="group cursor-pointer">
-                    <p className="text-sm font-bold text-gray-800 group-hover:text-black transition-colors">#{item.tag}</p>
-                    <p className="text-[10px] text-gray-400">{item.count} vibing</p>
+                    <p className="text-[11px] font-bold text-gray-800 group-hover:text-black transition-colors">#{item.tag}</p>
+                    <p className="text-[8px] font-bold text-gray-400 uppercase">{item.count} vibing</p>
                   </div>
                 ))}
               </div>
@@ -75,18 +74,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         )}
       </div>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-gray-200 flex justify-around py-2.5 px-2 z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-gray-100 flex justify-around py-2 px-2 z-50">
         <Link to="/" className={`p-2 rounded-lg ${location.pathname === '/' ? 'text-black' : 'text-gray-400'}`}>
-          <i className="fas fa-home text-lg"></i>
+          <i className="fas fa-home text-base"></i>
         </Link>
         <Link to="/explore" className={`p-2 rounded-lg ${location.pathname === '/explore' ? 'text-black' : 'text-gray-400'}`}>
-          <i className="fas fa-search text-lg"></i>
+          <i className="fas fa-search text-base"></i>
         </Link>
         <Link to="/messages" className={`p-2 rounded-lg ${location.pathname === '/messages' ? 'text-black' : 'text-gray-400'}`}>
-          <i className="fas fa-envelope text-lg"></i>
+          <i className="fas fa-envelope text-base"></i>
         </Link>
         <Link to="/profile" className={`p-2 rounded-lg ${location.pathname === '/profile' ? 'text-black' : 'text-gray-400'}`}>
-          <i className="fas fa-user text-lg"></i>
+          <i className="fas fa-user text-base"></i>
         </Link>
       </nav>
     </div>
