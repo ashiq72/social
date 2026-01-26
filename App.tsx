@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import Home from './views/Home';
-import Profile from './views/Profile';
-import Messages from './views/Messages';
+import Layout from './components/Layout.tsx';
+import Home from './views/Home.tsx';
+import Profile from './views/Profile.tsx';
+import Messages from './views/Messages.tsx';
 
 const ExploreView = () => (
   <div className="bg-white rounded-xl p-6 md:p-10 text-center border border-gray-50 shadow-sm">
