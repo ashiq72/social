@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Post } from '../types.ts';
+import { useAuth } from '../context/AuthContext.tsx';
 
 interface PostComposerProps {
   onPostCreated: (post: Post) => void;
@@ -9,18 +10,19 @@ interface PostComposerProps {
 const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
   const [content, setContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const { currentUser } = useAuth(); // Get current user
 
   const handlePost = async () => {
-    if (!content.trim()) return;
+    if (!content.trim() || !currentUser) return; // Ensure user is logged in
     setIsPosting(true);
     
     const newPost: Post = {
       id: Math.random().toString(36).substr(2, 9),
-      userId: 'u1',
+      userId: currentUser.id, // Use current user ID from fetched data
       user: {
-        name: 'Alex Rivera',
-        username: 'arivera_vibes',
-        avatar: 'https://picsum.photos/seed/alex/200/200'
+        name: currentUser.name,
+        username: currentUser.username, // Use current user username from fetched data
+        avatar: currentUser.avatar
       },
       content,
       likes: 0,
@@ -39,7 +41,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
     <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm mb-5">
       <div className="flex space-x-4">
         <div className="w-11 h-11 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
-          <img src="https://picsum.photos/seed/alex/100/100" alt="avatar" className="w-full h-full object-cover" />
+          <img src={currentUser?.avatar || "https://picsum.photos/seed/default/100/100"} alt="avatar" className="w-full h-full object-cover" /> {/* Display user avatar */}
         </div>
         <div className="flex-1">
           <textarea
@@ -64,7 +66,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
             
             <button
               onClick={handlePost}
-              disabled={!content.trim() || isPosting}
+              disabled={!content.trim() || isPosting || !currentUser} // Disable if no content, posting, or no user
               className="bg-black hover:bg-slate-800 disabled:opacity-30 text-white font-bold py-2.5 px-8 rounded-xl transition-all text-sm shadow-lg shadow-black/10 active:scale-95"
             >
               {isPosting ? 'Posting...' : 'Post vibe'}

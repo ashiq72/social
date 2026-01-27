@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { apiService } from '../services/apiService.ts';
+import { useAuth } from '../context/AuthContext.tsx';
 
 const Navbar: React.FC = () => {
+  const { currentUser, logout } = useAuth();
+
   return (
     <nav className="sticky top-0 z-50 glass border-b border-slate-100 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -29,7 +31,7 @@ const Navbar: React.FC = () => {
 
         <div className="flex items-center space-x-3 md:space-x-4">
           <button 
-            onClick={() => apiService.logout()}
+            onClick={logout}
             className="w-10 h-10 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all flex items-center justify-center"
             title="Logout"
           >
@@ -43,10 +45,10 @@ const Navbar: React.FC = () => {
           
           <Link to="/profile" className="flex items-center space-x-3 p-1 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
             <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm">
-              <img src="https://picsum.photos/seed/alex/100/100" alt="Profile" className="w-full h-full object-cover" />
+              <img src={currentUser?.avatar || "https://picsum.photos/seed/default/100/100"} alt="Profile" className="w-full h-full object-cover" />
             </div>
             <div className="hidden lg:block">
-              <p className="text-sm font-bold text-slate-800 leading-none">Vibe User</p>
+              <p className="text-sm font-bold text-slate-800 leading-none">{currentUser?.name || 'Vibe User'}</p>
               <p className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">Online</p>
             </div>
           </Link>

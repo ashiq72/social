@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext.tsx';
 
 const HIGHLIGHTS = [
   { id: 'h1', title: 'Work', icon: 'fa-briefcase', color: 'bg-blue-500' },
@@ -12,6 +13,7 @@ const SKILLS = ['React', 'TypeScript', 'Node.js', 'Tailwind', 'Python'];
 
 const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('posts');
+  const { currentUser } = useAuth();
 
   const stats = [
     { label: 'Posts', value: '152' },
@@ -38,7 +40,7 @@ const Profile: React.FC = () => {
               <div className="relative group mx-auto md:mx-0">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-[36px] bg-white p-1.5 shadow-xl overflow-hidden ring-8 ring-[#fbfcfd] relative">
                   <img 
-                    src="https://picsum.photos/seed/alex/500/500" 
+                    src={currentUser?.avatar || "https://picsum.photos/seed/default/500/500"} 
                     className="rounded-[30px] w-full h-full object-cover" 
                     alt="Avatar" 
                   />
@@ -50,10 +52,10 @@ const Profile: React.FC = () => {
 
               <div className="text-center md:text-left mb-2">
                 <div className="flex items-center justify-center md:justify-start space-x-3">
-                  <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Alex Rivera</h1>
+                  <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{currentUser?.name || 'Vibe User'}</h1>
                   <i className="fas fa-circle-check text-blue-500 text-lg"></i>
                 </div>
-                <p className="text-slate-500 font-semibold text-sm mt-1">@arivera_vibes</p>
+                <p className="text-slate-500 font-semibold text-sm mt-1">@{currentUser?.username || 'vibestreamer'}</p>
               </div>
             </div>
 

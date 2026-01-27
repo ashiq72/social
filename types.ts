@@ -1,12 +1,14 @@
 
+
 export interface User {
-  id: string;
+  id: string; // Will map from _id
   name: string;
-  username: string;
+  username: string; // This could come from the backend's User model directly, or be derived from phone
   avatar: string;
   bio?: string;
   followersCount: number;
   followingCount: number;
+  phone: string; // Added phone field
 }
 
 export interface Post {
@@ -52,4 +54,12 @@ export interface Conversation {
   lastMessageTimestamp: string;
   unreadCount: number;
   isOnline?: boolean;
+}
+
+export interface JwtPayload {
+  userId: string;
+  name: string;
+  phone: string;
+  iat: number; // issued at
+  exp: number; // expiration
 }

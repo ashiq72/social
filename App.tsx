@@ -6,11 +6,12 @@ import Home from './views/Home.tsx';
 import Profile from './views/Profile.tsx';
 import Messages from './views/Messages.tsx';
 import Login from './views/Login.tsx';
-import { apiService } from './services/apiService.ts';
+import { useAuth, AuthProvider } from './context/AuthContext.tsx';
 
 // Defined children as optional to resolve TypeScript strictness issues in nested JSX structures
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
-  if (!apiService.isAuthenticated()) {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
@@ -62,26 +63,28 @@ const NotificationsView = () => (
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route 
-          path="/*" 
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/explore" element={<ExploreView />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/notifications" element={<NotificationsView />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-      </Routes>
+      <AuthProvider> {/* Wrap the entire application with AuthProvider */}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/*" 
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/explore" element={<ExploreView />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/notifications" element={<NotificationsView />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </AuthProvider>
     </HashRouter>
   );
 };

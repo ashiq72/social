@@ -1,4 +1,7 @@
 
+
+import { JwtPayload } from '../types.ts';
+
 const BASE_URL = 'https://base360.onrender.com/api/v1';
 
 export const apiService = {
@@ -24,6 +27,21 @@ export const apiService = {
     return data;
   },
 
+  async getMe(token: string) {
+    const response = await fetch(`${BASE_URL}/users/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch user details');
+    }
+    return data;
+  },
+
   setToken(token: string) {
     localStorage.setItem('vibe_token', token);
   },
@@ -34,10 +52,24 @@ export const apiService = {
 
   logout() {
     localStorage.removeItem('vibe_token');
-    window.location.href = '#/login';
+    window.location.href = '#/login'; // Redirect to login page
   },
 
   isAuthenticated() {
     return !!this.getToken();
-  }
+  },
+
+  decodeToken(token: string): JwtPayload | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid token format');
+      }
+      const decodedPayload = JSON.parse(atob(parts[1]));
+      return decodedPayload as JwtPayload;
+    } catch (e) {
+      console.error('Failed to decode token:', e);
+      return null;
+    }
+  },
 };

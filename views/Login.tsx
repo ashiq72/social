@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/apiService.ts';
+import { useAuth } from '../context/AuthContext.tsx';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,12 +12,13 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login: authLogin, isAuthenticated: authIsAuthenticated } = useAuth(); // Use auth context for login/isAuthenticated
 
   useEffect(() => {
-    if (apiService.isAuthenticated()) {
+    if (authIsAuthenticated) { // Check isAuthenticated from context
       navigate('/');
     }
-  }, [navigate]);
+  }, [navigate, authIsAuthenticated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +29,7 @@ const Login: React.FC = () => {
       if (isLogin) {
         const response = await apiService.login({ phone, password });
         if (response.data?.accessToken) {
-          apiService.setToken(response.data.accessToken);
+          authLogin(response.data.accessToken); // Use auth context login
           navigate('/');
         } else {
           setError('Login failed. Please try again.');

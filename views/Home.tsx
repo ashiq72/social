@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import PostComposer from '../components/PostComposer.tsx';
 import PostCard from '../components/PostCard.tsx';
 import { Post } from '../types.ts';
+import { useAuth } from '../context/AuthContext.tsx';
 
 const INITIAL_POSTS: Post[] = [
   {
@@ -26,7 +27,6 @@ const INITIAL_POSTS: Post[] = [
 ];
 
 const VIBE_STORIES = [
-  { id: 's1', user: 'Alex', avatar: 'https://picsum.photos/seed/alex/150/150', active: true },
   { id: 's2', user: 'Sarah', avatar: 'https://picsum.photos/seed/sarah/150/150', active: true },
   { id: 's3', user: 'Jordan', avatar: 'https://picsum.photos/seed/jordan/150/150', active: false },
   { id: 's4', user: 'Maya', avatar: 'https://picsum.photos/seed/maya/150/150', active: true },
@@ -37,6 +37,7 @@ const VIBE_STORIES = [
 const Home: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [activeTab, setActiveTab] = useState('for-you');
+  const { currentUser } = useAuth(); // Get current user
 
   const handlePostCreated = (newPost: Post) => {
     setPosts([newPost, ...posts]);
@@ -48,9 +49,15 @@ const Home: React.FC = () => {
       <section className="flex space-x-5 overflow-x-auto no-scrollbar pb-2">
         <div className="flex-shrink-0 flex flex-col items-center space-y-2.5 group cursor-pointer">
           <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border-2 border-dashed border-slate-200 group-hover:border-black transition-colors group-hover:bg-white shadow-sm">
-            <i className="fas fa-plus text-slate-400 group-hover:text-black text-sm"></i>
+            {currentUser ? (
+               <div className="w-full h-full rounded-[13px] bg-white p-[2px] overflow-hidden">
+                 <img src={currentUser.avatar} alt="You" className="w-full h-full object-cover rounded-[11px]" />
+               </div>
+            ) : (
+               <i className="fas fa-plus text-slate-400 group-hover:text-black text-sm"></i>
+            )}
           </div>
-          <span className="text-xs font-bold text-slate-400 group-hover:text-black transition-colors">You</span>
+          <span className="text-xs font-bold text-slate-400 group-hover:text-black transition-colors">{currentUser?.name || 'You'}</span>
         </div>
         {VIBE_STORIES.map(story => (
           <div key={story.id} className="flex-shrink-0 flex flex-col items-center space-y-2.5 cursor-pointer group">
