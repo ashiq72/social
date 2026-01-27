@@ -41,10 +41,13 @@ export const apiService = {
     return data;
   },
 
-  async createPost(payload: { title: string; description: string; image?: File; }, token: string) {
+  async createPost(payload: { title: string; text: string; image?: File; }, token: string) {
     const formData = new FormData();
+    // Sending both text and description/title for backward/forward compatibility
     formData.append('title', payload.title);
-    formData.append('description', payload.description);
+    formData.append('description', payload.text); 
+    formData.append('text', payload.text); // Matches your Mongoose schema
+    
     if (payload.image) {
       formData.append('file', payload.image); // 'file' is the field name expected by multer.single("file")
     }
@@ -53,7 +56,6 @@ export const apiService = {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        // 'Content-Type': 'multipart/form-data' is NOT needed for FormData, browser sets it correctly
       },
       body: formData,
     });
@@ -75,6 +77,21 @@ export const apiService = {
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch posts');
+    }
+    return data;
+  },
+
+  async getMyPosts(token: string) {
+    const response = await fetch(`${BASE_URL}/social/posts/my`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch your posts');
     }
     return data;
   },

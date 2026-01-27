@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Post } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
-import { apiService } from '../services/apiService.ts'; // Import apiService
+import { apiService } from '../services/apiService.ts';
 
 interface PostComposerProps {
   onPostCreated: (post: Post) => void;
@@ -14,7 +14,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const [error, setError] = useState('');
-  const { currentUser } = useAuth(); // Get current user
+  const { currentUser } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +22,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
       const file = event.target.files[0];
       setSelectedImage(file);
       setImagePreview(URL.createObjectURL(file));
-      setError(''); // Clear any previous errors
+      setError('');
     }
   };
 
@@ -30,7 +30,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
     setSelectedImage(null);
     setImagePreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''; // Clear file input
+      fileInputRef.current.value = '';
     }
   };
 
@@ -49,34 +49,30 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
 
     try {
       const token = apiService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found.');
-      }
+      if (!token) throw new Error('No authentication token found.');
 
-      // Backend requires 'title' and 'description'
-      const postTitle = content.trim().substring(0, 50) || 'New Vibe'; // Take first 50 chars as title, or default
-      const postDescription = content.trim();
+      const postTitle = content.trim().substring(0, 50) || 'New Vibe';
+      const postText = content.trim();
 
       const response = await apiService.createPost(
-        { title: postTitle, description: postDescription, image: selectedImage },
+        { title: postTitle, text: postText, image: selectedImage },
         token
       );
 
       if (response.success && response.data) {
-        // Construct a Post object from the API response to update UI
         const newPost: Post = {
-          id: response.data._id, // Use the ID from backend
+          id: response.data._id,
           userId: currentUser.id,
           user: {
             name: currentUser.name,
             username: currentUser.username,
             avatar: currentUser.avatar
           },
-          content: response.data.description, // Use description from backend
-          image: response.data.image, // Use image URL from backend
-          likes: 0, // Initial likes
-          comments: 0, // Initial comments
-          timestamp: response.data.createdAt // Use timestamp from backend
+          content: response.data.text || response.data.description || postText,
+          image: response.data.image,
+          likes: 0,
+          comments: 0,
+          timestamp: response.data.createdAt || new Date().toISOString()
         };
         onPostCreated(newPost);
         setContent('');
@@ -145,9 +141,6 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
               </button>
               <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-xl transition-all hover:text-black active:scale-95" title="Add emoji">
                 <i className="far fa-face-smile text-lg"></i>
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-xl transition-all hover:text-black active:scale-95" title="Add poll">
-                <i className="fas fa-list-ul text-lg"></i>
               </button>
             </div>
             

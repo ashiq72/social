@@ -23,11 +23,10 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const fetchUserPosts = async () => {
-      if (!isAuthenticated || !currentUser?.id) {
+      if (!isAuthenticated) {
         setIsLoadingUserPosts(false);
         setErrorUserPosts('Please log in to see your posts.');
         setUserPosts([]);
-        console.log('Profile: Not authenticated or currentUser.id is missing. Skipping post fetch.');
         return;
       }
 
@@ -35,50 +34,35 @@ const Profile: React.FC = () => {
       setErrorUserPosts(null);
       try {
         const token = apiService.getToken();
-        if (!token) {
-          throw new Error('Authentication token not found.');
-        }
+        if (!token) throw new Error('Authentication token not found.');
 
-        console.log('Profile: Fetching all posts...');
-        const response = await apiService.getAllPosts(token); // Fetch all posts
+        // USE THE NEW DEDICATED ENDPOINT
+        const response = await apiService.getMyPosts(token);
         
         if (response.success && Array.isArray(response.data)) {
-          console.log('Profile: All posts fetched successfully. Total:', response.data.length);
-          console.log('Profile: Current User ID:', currentUser.id);
+          const mappedPosts: Post[] = response.data.map((p: any) => {
+            const userDetails = p.user || {};
+            const userId = userDetails._id || 'unknown_user_id';
 
-          // Filter and map only the current user's posts
-          const filteredPosts: Post[] = response.data
-            .filter((p: any) => {
-              const postUserId = p.user?._id;
-              const matchesCurrentUser = postUserId === currentUser.id;
-              console.log(`Profile: Post ID: ${p._id}, Post User ID: ${postUserId}, Matches Current User: ${matchesCurrentUser}`);
-              return matchesCurrentUser;
-            })
-            .map((p: any) => {
-              const userDetails = p.user || {};
-              const userId = userDetails._id || 'unknown_user_id';
-
-              return {
-                id: p._id,
-                userId: userId,
-                user: {
-                  name: userDetails.name || 'Unknown User',
-                  username: userDetails.username || userDetails.phone || 'anonymous',
-                  avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : `https://picsum.photos/seed/default/100/100`
-                },
-                content: p.description,
-                image: p.image,
-                likes: p.likes?.length || 0,
-                comments: p.comments?.length || 0,
-                timestamp: p.createdAt
-              };
-            });
-          setUserPosts(filteredPosts.reverse()); // Display newest first
-          console.log('Profile: Filtered user posts count:', filteredPosts.length);
+            return {
+              id: p._id,
+              userId: userId,
+              user: {
+                name: userDetails.name || currentUser?.name || 'Unknown User',
+                username: userDetails.username || userDetails.phone || currentUser?.username || 'anonymous',
+                avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : (currentUser?.avatar || `https://picsum.photos/seed/default/100/100`)
+              },
+              content: p.text || p.description || '', // Use 'text' as per your schema
+              image: p.image,
+              likes: p.likes?.length || 0,
+              comments: p.comments?.length || 0,
+              timestamp: p.createdAt
+            };
+          });
+          setUserPosts(mappedPosts.reverse());
         } else {
           setErrorUserPosts(response.message || 'Failed to fetch your posts.');
           setUserPosts([]);
-          console.error('Profile: Failed to fetch posts from API:', response.message);
         }
       } catch (err: any) {
         console.error('Profile: Error fetching user posts:', err);
@@ -90,17 +74,16 @@ const Profile: React.FC = () => {
     };
 
     fetchUserPosts();
-  }, [isAuthenticated, currentUser?.id]); // Refetch when auth status or current user changes
+  }, [isAuthenticated, currentUser?.id]);
 
   const stats = [
-    { label: 'Posts', value: userPosts.length.toString() }, // Dynamic posts count
-    { label: 'Followers', value: '1.2k' }, // Still mock
-    { label: 'Following', value: '850' } // Still mock
+    { label: 'Posts', value: userPosts.length.toString() },
+    { label: 'Followers', value: '1.2k' },
+    { label: 'Following', value: '850' }
   ];
 
   return (
     <div className="space-y-6 pb-20 w-full">
-      {/* 1. HEADER SECTION */}
       <div className="relative">
         <div className="h-48 md:h-64 rounded-3xl overflow-hidden relative shadow-md">
           <img 
@@ -149,7 +132,6 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. STATS & BIO */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between space-y-6">
           <div className="flex justify-between w-full items-center px-4">
@@ -193,7 +175,6 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. TABS */}
       <div className="space-y-6">
         <div className="flex space-x-8 px-2 border-b border-slate-100">
           {['Posts', 'Media', 'Likes'].map(tab => (
@@ -249,7 +230,7 @@ const Profile: React.FC = () => {
           )}
            {activeTab === 'likes' && (
             <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-500 text-center font-bold">
-              Posts you liked will appear here (feature coming soon!).
+              Posts you liked will appear here.
             </div>
           )}
         </div>

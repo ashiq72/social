@@ -19,7 +19,7 @@ const Home: React.FC = () => {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [errorPosts, setErrorPosts] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('for-you');
-  const { currentUser, isAuthenticated } = useAuth(); // Get current user and auth status
+  const { currentUser, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -38,9 +38,7 @@ const Home: React.FC = () => {
         
         const response = await apiService.getAllPosts(token);
         if (response.success && Array.isArray(response.data)) {
-          // Map backend post data to frontend Post interface
           const fetchedPosts: Post[] = response.data.map((p: any) => {
-            // Safely access user details, providing fallbacks if p.user is null/undefined
             const userDetails = p.user || {};
             const userId = userDetails._id || 'unknown_user_id';
 
@@ -52,14 +50,14 @@ const Home: React.FC = () => {
                 username: userDetails.username || userDetails.phone || 'anonymous',
                 avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : `https://picsum.photos/seed/default/100/100`
               },
-              content: p.description, // Backend uses 'description' for post content
+              content: p.text || p.description || '', // Use 'text' from schema
               image: p.image,
-              likes: p.likes?.length || 0, // Assuming likes is an array of user IDs
-              comments: p.comments?.length || 0, // Assuming comments is an array
-              timestamp: p.createdAt // Use createdAt for timestamp
+              likes: p.likes?.length || 0,
+              comments: p.comments?.length || 0,
+              timestamp: p.createdAt
             };
           });
-          setPosts(fetchedPosts.reverse()); // Display newest first
+          setPosts(fetchedPosts.reverse());
         } else {
           setErrorPosts(response.message || 'Failed to fetch posts.');
           setPosts([]);
@@ -74,7 +72,7 @@ const Home: React.FC = () => {
     };
 
     fetchPosts();
-  }, [isAuthenticated]); // Refetch when authentication status changes
+  }, [isAuthenticated]);
 
   const handlePostCreated = (newPost: Post) => {
     setPosts([newPost, ...posts]);
@@ -82,7 +80,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-24 md:pb-12">
-      {/* Vibe Stories Reel */}
       <section className="flex space-x-5 overflow-x-auto no-scrollbar pb-2">
         <div className="flex-shrink-0 flex flex-col items-center space-y-2.5 group cursor-pointer">
           <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border-2 border-dashed border-slate-200 group-hover:border-black transition-colors group-hover:bg-white shadow-sm">
@@ -112,7 +109,6 @@ const Home: React.FC = () => {
 
       <PostComposer onPostCreated={handlePostCreated} />
 
-      {/* Tabs */}
       <nav className="flex items-center space-x-8 px-1">
         <button 
           onClick={() => setActiveTab('for-you')}
