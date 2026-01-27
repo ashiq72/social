@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Post } from '../types';
+import { Post } from '../types.ts';
 
 interface PostComposerProps {
   onPostCreated: (post: Post) => void;
@@ -32,39 +32,42 @@ const PostComposer: React.FC<PostComposerProps> = ({ onPostCreated }) => {
       onPostCreated(newPost);
       setContent('');
       setIsPosting(false);
-    }, 400);
+    }, 600);
   };
 
   return (
-    <div className="bg-white rounded-xl p-3 border border-gray-50 shadow-sm mb-2">
-      <div className="flex space-x-2.5">
-        <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 border border-gray-50">
-          <img src="https://picsum.photos/seed/alex/100/100" alt="avatar" />
+    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm mb-5">
+      <div className="flex space-x-4">
+        <div className="w-11 h-11 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
+          <img src="https://picsum.photos/seed/alex/100/100" alt="avatar" className="w-full h-full object-cover" />
         </div>
         <div className="flex-1">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Share your thoughts..."
-            className="w-full border-none focus:ring-0 text-[11px] text-gray-800 bg-transparent resize-none h-12 placeholder-gray-400 font-medium leading-normal"
+            placeholder="What's on your mind today?"
+            className="w-full border-none focus:ring-0 text-[16px] text-black bg-transparent resize-none h-20 placeholder-slate-300 font-bold leading-relaxed"
           ></textarea>
           
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center space-x-0.5">
-              <button className="w-6 h-6 flex items-center justify-center hover:bg-gray-50 text-gray-400 rounded-lg transition-colors hover:text-black">
-                <i className="far fa-image text-[10px]"></i>
+          <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+            <div className="flex items-center space-x-2">
+              <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-xl transition-all hover:text-black active:scale-95">
+                <i className="far fa-image text-lg"></i>
               </button>
-              <button className="w-6 h-6 flex items-center justify-center hover:bg-gray-50 text-gray-400 rounded-lg transition-colors hover:text-black">
-                <i className="far fa-smile text-[10px]"></i>
+              <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-xl transition-all hover:text-black active:scale-95">
+                <i className="far fa-face-smile text-lg"></i>
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-xl transition-all hover:text-black active:scale-95">
+                <i className="fas fa-list-ul text-lg"></i>
               </button>
             </div>
             
             <button
               onClick={handlePost}
               disabled={!content.trim() || isPosting}
-              className="bg-black hover:bg-gray-800 disabled:bg-gray-50 disabled:text-gray-300 text-white font-bold py-1 px-3.5 rounded-lg transition-all text-[9px] uppercase tracking-wider"
+              className="bg-black hover:bg-slate-800 disabled:opacity-30 text-white font-bold py-2.5 px-8 rounded-xl transition-all text-sm shadow-lg shadow-black/10 active:scale-95"
             >
-              {isPosting ? '...' : 'Post'}
+              {isPosting ? 'Posting...' : 'Post vibe'}
             </button>
           </div>
         </div>

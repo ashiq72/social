@@ -1,26 +1,26 @@
 
 import React, { useState } from 'react';
-import PostComposer from '../components/PostComposer';
-import PostCard from '../components/PostCard';
-import { Post } from '../types';
+import PostComposer from '../components/PostComposer.tsx';
+import PostCard from '../components/PostCard.tsx';
+import { Post } from '../types.ts';
 
 const INITIAL_POSTS: Post[] = [
   {
     id: 'p1',
     userId: 'u1',
     user: { name: 'Alex Rivera', username: 'arivera_vibes', avatar: 'https://picsum.photos/seed/alex/200/200' },
-    content: "Building the future of social connections with a clean, decoupled architecture. 🚀 #VibeStream #FullStack",
-    likes: 128,
-    comments: 12,
+    content: "Design is not just what it looks like and feels like. Design is how it works. 🎨 Building something beautiful today.",
+    likes: 256,
+    comments: 24,
     timestamp: new Date().toISOString()
   },
   {
     id: 'p2',
     userId: 'u2',
     user: { name: 'Sarah Chen', username: 'schen_dev', avatar: 'https://picsum.photos/seed/sarah/200/200' },
-    content: "The minimalist UI design is really coming together. Less is definitely more. ✨",
-    likes: 84,
-    comments: 5,
+    content: "The minimalist UI design is really coming together. Less is definitely more. ✨ #Frontend #VibeStream",
+    likes: 142,
+    comments: 15,
     timestamp: new Date(Date.now() - 3600000).toISOString()
   }
 ];
@@ -43,23 +43,23 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="space-y-3 pb-24 md:pb-12">
+    <div className="space-y-6 pb-24 md:pb-12">
       {/* Vibe Stories Reel */}
-      <section className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
-        <div className="flex-shrink-0 flex flex-col items-center space-y-1.5 group cursor-pointer">
-          <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center border border-dashed border-gray-200 group-hover:border-black transition-colors">
-            <i className="fas fa-plus text-gray-400 group-hover:text-black text-[10px]"></i>
+      <section className="flex space-x-5 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex-shrink-0 flex flex-col items-center space-y-2.5 group cursor-pointer">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border-2 border-dashed border-slate-200 group-hover:border-black transition-colors group-hover:bg-white shadow-sm">
+            <i className="fas fa-plus text-slate-400 group-hover:text-black text-sm"></i>
           </div>
-          <span className="text-[8px] font-bold uppercase text-gray-400">You</span>
+          <span className="text-xs font-bold text-slate-400 group-hover:text-black transition-colors">You</span>
         </div>
         {VIBE_STORIES.map(story => (
-          <div key={story.id} className="flex-shrink-0 flex flex-col items-center space-y-1.5 cursor-pointer group">
-            <div className={`w-12 h-12 rounded-xl p-0.5 transition-transform group-hover:scale-105 duration-300 ${story.active ? 'bg-gradient-to-tr from-black to-gray-400' : 'bg-gray-200'}`}>
-              <div className="w-full h-full rounded-[0.65rem] bg-white p-0.5 overflow-hidden">
-                <img src={story.avatar} alt={story.user} className="w-full h-full object-cover rounded-[0.6rem]" />
+          <div key={story.id} className="flex-shrink-0 flex flex-col items-center space-y-2.5 cursor-pointer group">
+            <div className={`w-16 h-16 rounded-2xl p-[3px] transition-transform group-hover:scale-105 duration-300 ${story.active ? 'bg-gradient-to-tr from-amber-400 via-rose-500 to-indigo-600' : 'bg-slate-200'}`}>
+              <div className="w-full h-full rounded-[13px] bg-white p-[2px] overflow-hidden">
+                <img src={story.avatar} alt={story.user} className="w-full h-full object-cover rounded-[11px]" />
               </div>
             </div>
-            <span className={`text-[8px] font-bold uppercase ${story.active ? 'text-black' : 'text-gray-400'}`}>
+            <span className={`text-xs font-bold ${story.active ? 'text-black' : 'text-slate-400'}`}>
               {story.user}
             </span>
           </div>
@@ -68,23 +68,25 @@ const Home: React.FC = () => {
 
       <PostComposer onPostCreated={handlePostCreated} />
 
-      {/* Tabs - No border bottom as requested */}
-      <nav className="flex items-center space-x-5 py-1 px-1">
+      {/* Tabs */}
+      <nav className="flex items-center space-x-8 px-1">
         <button 
           onClick={() => setActiveTab('for-you')}
-          className={`text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'for-you' ? 'text-black' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`text-sm font-bold tracking-tight transition-all relative py-2 ${activeTab === 'for-you' ? 'text-black' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          For You
+          For you
+          {activeTab === 'for-you' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-black rounded-full"></div>}
         </button>
         <button 
           onClick={() => setActiveTab('following')}
-          className={`text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'following' ? 'text-black' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`text-sm font-bold tracking-tight transition-all relative py-2 ${activeTab === 'following' ? 'text-black' : 'text-slate-400 hover:text-slate-600'}`}
         >
           Following
+          {activeTab === 'following' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-black rounded-full"></div>}
         </button>
       </nav>
       
-      <div className="space-y-3">
+      <div className="space-y-6">
         {posts.map(post => (
           <PostCard key={post.id} post={post} />
         ))}
