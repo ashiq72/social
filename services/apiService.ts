@@ -64,6 +64,21 @@ export const apiService = {
     return data;
   },
 
+  async getAllPosts(token: string) {
+    const response = await fetch(`${BASE_URL}/social/posts/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch posts');
+    }
+    return data;
+  },
+
   setToken(token: string) {
     localStorage.setItem('vibe_token', token);
   },

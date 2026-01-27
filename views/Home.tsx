@@ -1,30 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PostComposer from '../components/PostComposer.tsx';
 import PostCard from '../components/PostCard.tsx';
 import { Post } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
-
-const INITIAL_POSTS: Post[] = [
-  {
-    id: 'p1',
-    userId: 'u1',
-    user: { name: 'Alex Rivera', username: 'arivera_vibes', avatar: 'https://picsum.photos/seed/alex/200/200' },
-    content: "Design is not just what it looks like and feels like. Design is how it works. 🎨 Building something beautiful today.",
-    likes: 256,
-    comments: 24,
-    timestamp: new Date().toISOString()
-  },
-  {
-    id: 'p2',
-    userId: 'u2',
-    user: { name: 'Sarah Chen', username: 'schen_dev', avatar: 'https://picsum.photos/seed/sarah/200/200' },
-    content: "The minimalist UI design is really coming together. Less is definitely more. ✨ #Frontend #VibeStream",
-    likes: 142,
-    comments: 15,
-    timestamp: new Date(Date.now() - 3600000).toISOString()
-  }
-];
+import { apiService } from '../services/apiService.ts';
 
 const VIBE_STORIES = [
   { id: 's2', user: 'Sarah', avatar: 'https://picsum.photos/seed/sarah/150/150', active: true },
@@ -35,9 +15,66 @@ const VIBE_STORIES = [
 ];
 
 const Home: React.FC = () => {
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+  const [errorPosts, setErrorPosts] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('for-you');
-  const { currentUser } = useAuth(); // Get current user
+  const { currentUser, isAuthenticated } = useAuth(); // Get current user and auth status
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (!isAuthenticated) {
+        setIsLoadingPosts(false);
+        setErrorPosts('Please log in to see posts.');
+        setPosts([]);
+        return;
+      }
+
+      setIsLoadingPosts(true);
+      setErrorPosts(null);
+      try {
+        const token = apiService.getToken();
+        if (!token) throw new Error('Authentication token not found.');
+        
+        const response = await apiService.getAllPosts(token);
+        if (response.success && Array.isArray(response.data)) {
+          // Map backend post data to frontend Post interface
+          const fetchedPosts: Post[] = response.data.map((p: any) => {
+            // Safely access user details, providing fallbacks if p.user is null/undefined
+            const userDetails = p.user || {};
+            const userId = userDetails._id || 'unknown_user_id';
+
+            return {
+              id: p._id,
+              userId: userId,
+              user: {
+                name: userDetails.name || 'Unknown User',
+                username: userDetails.username || userDetails.phone || 'anonymous',
+                avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : `https://picsum.photos/seed/default/100/100`
+              },
+              content: p.description, // Backend uses 'description' for post content
+              image: p.image,
+              likes: p.likes?.length || 0, // Assuming likes is an array of user IDs
+              comments: p.comments?.length || 0, // Assuming comments is an array
+              timestamp: p.createdAt // Use createdAt for timestamp
+            };
+          });
+          setPosts(fetchedPosts.reverse()); // Display newest first
+        } else {
+          setErrorPosts(response.message || 'Failed to fetch posts.');
+          setPosts([]);
+        }
+      } catch (err: any) {
+        console.error('Error fetching posts:', err);
+        setErrorPosts(err.message || 'Could not load posts.');
+        setPosts([]);
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    };
+
+    fetchPosts();
+  }, [isAuthenticated]); // Refetch when authentication status changes
 
   const handlePostCreated = (newPost: Post) => {
     setPosts([newPost, ...posts]);
@@ -93,10 +130,24 @@ const Home: React.FC = () => {
         </button>
       </nav>
       
-      <div className="space-y-6">
-        {posts.map(post => (
-          <PostCard key={post.id} post={post} />
-        ))}
+      <div className="space-y-6 mt-6">
+        {isLoadingPosts ? (
+          <div className="flex justify-center items-center h-40">
+            <div className="w-8 h-8 border-4 border-slate-200 border-t-black rounded-full animate-spin"></div>
+          </div>
+        ) : errorPosts ? (
+          <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-center font-bold">
+            {errorPosts}
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-500 text-center font-bold">
+            No posts found. Be the first to share a vibe!
+          </div>
+        ) : (
+          posts.map(post => (
+            <PostCard key={post.id} post={post} />
+          ))
+        )}
       </div>
     </div>
   );

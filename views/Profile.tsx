@@ -1,6 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
+import { apiService } from '../services/apiService.ts';
+import { Post } from '../types.ts';
+import PostCard from '../components/PostCard.tsx';
 
 const HIGHLIGHTS = [
   { id: 'h1', title: 'Work', icon: 'fa-briefcase', color: 'bg-blue-500' },
@@ -13,12 +16,86 @@ const SKILLS = ['React', 'TypeScript', 'Node.js', 'Tailwind', 'Python'];
 
 const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('posts');
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticated } = useAuth();
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [isLoadingUserPosts, setIsLoadingUserPosts] = useState(true);
+  const [errorUserPosts, setErrorUserPosts] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      if (!isAuthenticated || !currentUser?.id) {
+        setIsLoadingUserPosts(false);
+        setErrorUserPosts('Please log in to see your posts.');
+        setUserPosts([]);
+        console.log('Profile: Not authenticated or currentUser.id is missing. Skipping post fetch.');
+        return;
+      }
+
+      setIsLoadingUserPosts(true);
+      setErrorUserPosts(null);
+      try {
+        const token = apiService.getToken();
+        if (!token) {
+          throw new Error('Authentication token not found.');
+        }
+
+        console.log('Profile: Fetching all posts...');
+        const response = await apiService.getAllPosts(token); // Fetch all posts
+        
+        if (response.success && Array.isArray(response.data)) {
+          console.log('Profile: All posts fetched successfully. Total:', response.data.length);
+          console.log('Profile: Current User ID:', currentUser.id);
+
+          // Filter and map only the current user's posts
+          const filteredPosts: Post[] = response.data
+            .filter((p: any) => {
+              const postUserId = p.user?._id;
+              const matchesCurrentUser = postUserId === currentUser.id;
+              console.log(`Profile: Post ID: ${p._id}, Post User ID: ${postUserId}, Matches Current User: ${matchesCurrentUser}`);
+              return matchesCurrentUser;
+            })
+            .map((p: any) => {
+              const userDetails = p.user || {};
+              const userId = userDetails._id || 'unknown_user_id';
+
+              return {
+                id: p._id,
+                userId: userId,
+                user: {
+                  name: userDetails.name || 'Unknown User',
+                  username: userDetails.username || userDetails.phone || 'anonymous',
+                  avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : `https://picsum.photos/seed/default/100/100`
+                },
+                content: p.description,
+                image: p.image,
+                likes: p.likes?.length || 0,
+                comments: p.comments?.length || 0,
+                timestamp: p.createdAt
+              };
+            });
+          setUserPosts(filteredPosts.reverse()); // Display newest first
+          console.log('Profile: Filtered user posts count:', filteredPosts.length);
+        } else {
+          setErrorUserPosts(response.message || 'Failed to fetch your posts.');
+          setUserPosts([]);
+          console.error('Profile: Failed to fetch posts from API:', response.message);
+        }
+      } catch (err: any) {
+        console.error('Profile: Error fetching user posts:', err);
+        setErrorUserPosts(err.message || 'Could not load your posts.');
+        setUserPosts([]);
+      } finally {
+        setIsLoadingUserPosts(false);
+      }
+    };
+
+    fetchUserPosts();
+  }, [isAuthenticated, currentUser?.id]); // Refetch when auth status or current user changes
 
   const stats = [
-    { label: 'Posts', value: '152' },
-    { label: 'Followers', value: '1.2k' },
-    { label: 'Following', value: '850' }
+    { label: 'Posts', value: userPosts.length.toString() }, // Dynamic posts count
+    { label: 'Followers', value: '1.2k' }, // Still mock
+    { label: 'Following', value: '850' } // Still mock
   ];
 
   return (
@@ -135,21 +212,44 @@ const Profile: React.FC = () => {
 
         <div className="grid grid-cols-1 gap-6">
           {activeTab === 'posts' && (
-            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-               <div className="flex items-center space-x-3 mb-4">
-                 <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-sm">AR</div>
-                 <p className="text-sm font-bold">Latest thoughts on React 19... 🚀</p>
-               </div>
-               <p className="text-slate-500 text-xs font-semibold">Pinned by you • 2 days ago</p>
+            <div className="space-y-6">
+              {isLoadingUserPosts ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="w-8 h-8 border-4 border-slate-200 border-t-black rounded-full animate-spin"></div>
+                </div>
+              ) : errorUserPosts ? (
+                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-center font-bold">
+                  {errorUserPosts}
+                </div>
+              ) : userPosts.length === 0 ? (
+                <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-500 text-center font-bold">
+                  You haven't posted anything yet. Share your first vibe!
+                </div>
+              ) : (
+                userPosts.map(post => (
+                  <PostCard key={post.id} post={post} />
+                ))
+              )}
             </div>
           )}
           {activeTab === 'media' && (
             <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden hover:opacity-90 transition-opacity cursor-pointer">
-                  <img src={`https://picsum.photos/seed/media-${i}/600/600`} className="w-full h-full object-cover" alt="" />
+              {userPosts.filter(p => p.image).length > 0 ? (
+                userPosts.filter(p => p.image).map(post => (
+                  <div key={post.id} className="aspect-square bg-slate-100 rounded-2xl overflow-hidden hover:opacity-90 transition-opacity cursor-pointer">
+                    <img src={post.image} className="w-full h-full object-cover" alt="Post media" />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-500 text-center font-bold">
+                  No media posts found.
                 </div>
-              ))}
+              )}
+            </div>
+          )}
+           {activeTab === 'likes' && (
+            <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-500 text-center font-bold">
+              Posts you liked will appear here (feature coming soon!).
             </div>
           )}
         </div>
