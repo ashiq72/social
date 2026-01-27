@@ -42,13 +42,20 @@ const Home: React.FC = () => {
             const userDetails = p.user || {};
             const userId = userDetails._id || 'unknown_user_id';
 
+            // Diagnostic log
+            console.log('Home: Post User Details:', userDetails);
+
             return {
               id: p._id,
               userId: userId,
               user: {
-                name: userDetails.name || 'Unknown User',
+                // Prioritize name, then username, then phone, then fallback
+                name: userDetails.name || userDetails.username || userDetails.phone || 'Unknown User',
                 username: userDetails.username || userDetails.phone || 'anonymous',
-                avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : `https://picsum.photos/seed/default/100/100`
+                // Use userDetails._id for unique avatar, fallback to generic
+                avatar: userDetails._id 
+                  ? `https://picsum.photos/seed/${userDetails._id}/100/100` 
+                  : `https://picsum.photos/seed/default/100/100`
               },
               content: p.text || p.description || '', // Use 'text' from schema
               image: p.image,

@@ -48,9 +48,13 @@ const Profile: React.FC = () => {
               id: p._id,
               userId: userId,
               user: {
-                name: userDetails.name || currentUser?.name || 'Unknown User',
+                // Prioritize name, then username, then phone, then fallback (using currentUser for self-posts)
+                name: userDetails.name || userDetails.username || userDetails.phone || currentUser?.name || 'Unknown User',
                 username: userDetails.username || userDetails.phone || currentUser?.username || 'anonymous',
-                avatar: userDetails._id ? `https://picsum.photos/seed/${userDetails._id}/100/100` : (currentUser?.avatar || `https://picsum.photos/seed/default/100/100`)
+                // Use userDetails._id for unique avatar, fallback to currentUser, then generic
+                avatar: userDetails._id 
+                  ? `https://picsum.photos/seed/${userDetails._id}/100/100` 
+                  : (currentUser?.avatar || `https://picsum.photos/seed/default/100/100`)
               },
               content: p.text || p.description || '', // Use 'text' as per your schema
               image: p.image,
