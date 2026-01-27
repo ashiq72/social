@@ -1,5 +1,4 @@
 
-
 import { JwtPayload } from '../types.ts';
 
 const BASE_URL = 'https://base360.onrender.com/api/v1';
@@ -38,6 +37,29 @@ export const apiService = {
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch user details');
+    }
+    return data;
+  },
+
+  async createPost(payload: { title: string; description: string; image?: File; }, token: string) {
+    const formData = new FormData();
+    formData.append('title', payload.title);
+    formData.append('description', payload.description);
+    if (payload.image) {
+      formData.append('file', payload.image); // 'file' is the field name expected by multer.single("file")
+    }
+
+    const response = await fetch(`${BASE_URL}/social/posts/create-post`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // 'Content-Type': 'multipart/form-data' is NOT needed for FormData, browser sets it correctly
+      },
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create post');
     }
     return data;
   },
