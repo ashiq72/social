@@ -1,4 +1,5 @@
 
+
 import { JwtPayload } from '../types.ts';
 
 const BASE_URL = 'https://base360.onrender.com/api/v1';
@@ -94,6 +95,25 @@ export const apiService = {
       throw new Error(data.message || 'Failed to fetch your posts');
     }
     return data;
+  },
+
+  async deletePost(postId: string, token: string) {
+    const response = await fetch(`${BASE_URL}/social/posts/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    // For DELETE, typically a 204 No Content or success status with minimal body
+    if (response.status === 204) { // No content
+      return { success: true, message: 'Post deleted successfully' };
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to delete post');
+    }
+    return { success: true, data: data };
   },
 
   setToken(token: string) {

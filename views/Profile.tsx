@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { apiService } from '../services/apiService.ts';
 import { Post } from '../types.ts';
@@ -79,6 +80,10 @@ const Profile: React.FC = () => {
 
     fetchUserPosts();
   }, [isAuthenticated, currentUser?.id]);
+
+  const handlePostDelete = useCallback((deletedPostId: string) => {
+    setUserPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId));
+  }, []);
 
   const stats = [
     { label: 'Posts', value: userPosts.length.toString() },
@@ -212,7 +217,7 @@ const Profile: React.FC = () => {
                 </div>
               ) : (
                 userPosts.map(post => (
-                  <PostCard key={post.id} post={post} />
+                  <PostCard key={post.id} post={post} onDeleteSuccess={handlePostDelete} />
                 ))
               )}
             </div>

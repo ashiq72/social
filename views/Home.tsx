@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import PostComposer from '../components/PostComposer.tsx';
 import PostCard from '../components/PostCard.tsx';
 import { Post } from '../types.ts';
@@ -85,6 +86,10 @@ const Home: React.FC = () => {
     setPosts([newPost, ...posts]);
   };
 
+  const handlePostDelete = useCallback((deletedPostId: string) => {
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId));
+  }, []);
+
   return (
     <div className="space-y-6 pb-24 md:pb-12">
       <section className="flex space-x-5 overflow-x-auto no-scrollbar pb-2">
@@ -148,7 +153,7 @@ const Home: React.FC = () => {
           </div>
         ) : (
           posts.map(post => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} onDeleteSuccess={handlePostDelete} />
           ))
         )}
       </div>
